@@ -1,0 +1,202 @@
+package org.cibertec.app;
+
+import java.awt.EventQueue;
+import java.util.List;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import org.cibertec.controlador.*;
+import org.cibertec.model.*;
+
+public class RegistroMendivil extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    private JTextField txtNroInventario, txtCosto, txtMotivo;
+    private JComboBox<Producto> cboProductos;
+    private JTextArea txtSalida;
+    
+    // Controladores
+    private InventarioJpaController jpaInventario;
+    private ProductoJpaController jpaProducto;
+
+    public static void main(String[] args) {
+        EventQueue.invokeLater(() -> {
+            try {
+                RegistroMendivil frame = new RegistroMendivil();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public RegistroMendivil() {
+        jpaInventario = new InventarioJpaController();
+        jpaProducto = new ProductoJpaController();
+        
+        setTitle("Mantenimiento de Inventarios - Distribuidora");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 500, 480);
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+
+        // --- Etiquetas y Campos ---
+        JLabel lblNro = new JLabel("Nro. Inventario:");
+        lblNro.setBounds(10, 11, 110, 14);
+        contentPane.add(lblNro);
+
+        txtNroInventario = new JTextField();
+        txtNroInventario.setBounds(130, 8, 86, 20);
+        contentPane.add(txtNroInventario);
+
+        JLabel lblProd = new JLabel("Producto:");
+        lblProd.setBounds(10, 45, 110, 14);
+        contentPane.add(lblProd);
+
+        cboProductos = new JComboBox<Producto>();
+        cboProductos.setBounds(130, 41, 200, 22);
+        contentPane.add(cboProductos);
+
+        JLabel lblCosto = new JLabel("Costo Ingreso:");
+        lblCosto.setBounds(10, 80, 110, 14);
+        contentPane.add(lblCosto);
+
+        txtCosto = new JTextField(); // Ahora es double en el modelo
+        txtCosto.setBounds(130, 77, 86, 20);
+        contentPane.add(txtCosto);
+
+        JLabel lblMotivo = new JLabel("Motivo Ingreso:");
+        lblMotivo.setBounds(10, 115, 110, 14);
+        contentPane.add(lblMotivo);
+
+        txtMotivo = new JTextField(); // Ahora es String en el modelo
+        txtMotivo.setBounds(130, 112, 200, 20);
+        contentPane.add(txtMotivo);
+
+        // --- Botones ---
+        JButton btnRegistrar = new JButton("Registrar");
+        btnRegistrar.addActionListener(e -> registrar());
+        btnRegistrar.setBounds(360, 41, 100, 23);
+        contentPane.add(btnRegistrar);
+
+        JButton btnActualizar = new JButton("Actualizar");
+        btnActualizar.addActionListener(e -> actualizar());
+        btnActualizar.setBounds(360, 76, 100, 23);
+        contentPane.add(btnActualizar);
+
+        JButton btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(e -> buscar());
+        btnBuscar.setBounds(226, 7, 89, 23);
+        contentPane.add(btnBuscar);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setBounds(10, 160, 464, 230);
+        contentPane.add(scrollPane);
+
+        txtSalida = new JTextArea();
+        scrollPane.setViewportView(txtSalida);
+
+        llenaCombo();
+    }
+
+    void llenaCombo() {
+        cboProductos.removeAllItems();
+        cboProductos.addItem(null);
+        List<Producto> lista = jpaProducto.findAllProducto();
+        for (Producto p : lista) {
+            cboProductos.addItem(p);
+        }
+    }
+
+    void registrar() {
+        try {
+            Inventario inv = new Inventario();
+            Producto p = (Producto) cboProductos.getSelectedItem();
+            
+            if(p == null) {
+                JOptionPane.showMessageDialog(this, "Debe seleccionar un producto");
+                return;
+            }
+            
+            // Asignación de datos con el nuevo tipado
+            inv.setIdProducto(p);
+            inv.setCostoIngreso(Double.parseDouble(txtCosto.getText())); // String a Double
+            inv.setMotivoIngreso(txtMotivo.getText()); // Campo String
+            
+            // Fecha del Sistema (java.sql.Date)
+            inv.setFecha(new java.sql.Date(System.currentTimeMillis()));
+            
+            jpaInventario.registrar(inv);
+            JOptionPane.showMessageDialog(this, "¡Inventario registrado con éxito!");
+            limpiar();
+        } catch (NumberFormatException nfe) {
+            JOptionPane.showMessageDialog(this, "El costo debe ser un valor numérico");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        }
+    }
+
+    void actualizar() {
+        try {
+            int id = Integer.parseInt(txtNroInventario.getText());
+            Inventario inv = jpaInventario.buscarById(id);
+            
+            if(inv != null) {
+                inv.setIdProducto((Producto) cboProductos.getSelectedItem());
+                inv.setCostoIngreso(Double.parseDouble(txtCosto.getText()));
+                inv.setMotivoIngreso(txtMotivo.getText());
+                
+                // Mantenemos o actualizamos la fecha si es necesario
+                inv.setFecha(new java.sql.Date(System.currentTimeMillis()));
+                
+                jpaInventario.actualizar(inv);
+                JOptionPane.showMessageDialog(this, "Inventario actualizado correctamente");
+                limpiar();
+            } else {
+                JOptionPane.showMessageDialog(this, "No se puede actualizar: El ID no existe");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al actualizar: " + e.getMessage());
+        }
+    }
+
+    void buscar() {
+        try {
+            int id = Integer.parseInt(txtNroInventario.getText());
+            Inventario inv = jpaInventario.buscarById(id);
+            if (inv != null) {
+                // Seteamos los campos con los datos de la BD
+                txtCosto.setText(String.valueOf(inv.getCostoIngreso()));
+                txtMotivo.setText(inv.getMotivoIngreso());
+                seleccionarProductoEnCombo(inv.getIdProducto().getIdProd());
+                
+                txtSalida.setText("Resultado de búsqueda:\n" + inv.toString());
+            } else {
+                JOptionPane.showMessageDialog(this, "ID de Inventario no encontrado");
+            }
+        } catch (Exception e) {
+        	e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Ingrese un número válido para buscar");
+        }
+    }
+
+    void seleccionarProductoEnCombo(int idProd) {
+        for (int i = 1; i < cboProductos.getItemCount(); i++) {
+            Producto p = cboProductos.getItemAt(i);
+            if (p != null && p.getIdProd() == idProd) {
+                cboProductos.setSelectedIndex(i);
+                break;
+            }
+        }
+    }
+
+    void limpiar() {
+        txtNroInventario.setText("");
+        txtCosto.setText("");
+        txtMotivo.setText("");
+        cboProductos.setSelectedIndex(0);
+        txtSalida.setText("");
+    }
+}

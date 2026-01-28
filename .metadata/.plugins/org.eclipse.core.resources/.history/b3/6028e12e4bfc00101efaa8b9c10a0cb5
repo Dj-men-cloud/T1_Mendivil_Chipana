@@ -1,0 +1,24 @@
+<persistence version="3.0" 
+             xmlns="https://jakarta.ee/xml/ns/persistence" 
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+	<!-- usamos 2.2 por la versión de eclipse, en versiones mas actuales debemos usar 3.0 en adelante para aprovechar todo jakarta -->
+    <persistence-unit name="LPII_Sesion04_MV_GIT" transaction-type="RESOURCE_LOCAL">
+
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <properties>
+            
+            <property name= "jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+            <property name= "jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/bd_almacen"/>
+            <property name= "jakarta.persistence.jdbc.user" value="root"/>
+            <property name= "jakarta.persistence.jdbc.password" value="mysql"/>
+            
+            
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+           
+        
+        </properties>
+    </persistence-unit>
+</persistence>

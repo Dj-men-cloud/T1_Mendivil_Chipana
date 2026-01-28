@@ -1,0 +1,3 @@
+INDEX VERSION 1.134
+file:/C:/Users/ACER%20NITRO%205/Desktop/CIBERTEC%20CURSOS/5%20ciclo/LP2/LP2_T1/.metadata/.plugins/org.eclipse.jdt.core/1865797976.index
+meta_index

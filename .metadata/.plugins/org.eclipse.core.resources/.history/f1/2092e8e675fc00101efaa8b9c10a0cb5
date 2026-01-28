@@ -1,0 +1,82 @@
+package org.cibertec.app;
+
+import java.awt.BorderLayout;
+import java.util.List;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import org.cibertec.controlador.InventarioJpaController;
+import org.cibertec.model.Inventario;
+
+public class ListadoMendivil extends JFrame {
+
+    private JPanel contentPane;
+    private JTable tblInventarios;
+    private DefaultTableModel modelo;
+    
+    // Controlador para traer los datos de la BD
+    private InventarioJpaController jpaInventario = new InventarioJpaController();
+
+    public static void main(String[] args) {
+        // El enunciado pide que al ejecutar el Main se muestren los inventarios
+        try {
+            ListadoMendivil frame = new ListadoMendivil();
+            frame.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ListadoMendivil() {
+        setTitle("Listado de Inventarios Realizados");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 700, 400);
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(new BorderLayout(0, 0));
+
+        // 1. Configurar el modelo de la tabla con las columnas solicitadas
+        String[] columnas = {
+            "NRO. INVENTARIO", 
+            "FECHA", 
+            "PRODUCTO", 
+            "NRO. CATEGORÍA", 
+            "COSTO INGRESO"
+        };
+        
+        modelo = new DefaultTableModel(columnas, 0);
+        tblInventarios = new JTable(modelo);
+        
+        // Agregar scroll por si hay muchos registros
+        JScrollPane scrollPane = new JScrollPane(tblInventarios);
+        contentPane.add(scrollPane, BorderLayout.CENTER);
+
+        // 2. Cargar los datos automáticamente al iniciar
+        listar();
+    }
+
+    void listar() {
+        // Limpiamos la tabla antes de cargar
+        modelo.setRowCount(0);
+        
+        try {
+            // Obtenemos la lista desde el controlador JPA
+            List<Inventario> lista = jpaInventario.findAllInventario();
+            
+            for (Inventario inv : lista) {
+                // Extraemos los datos navegando por los objetos relacionados
+                Object[] fila = {
+                    inv.getNroInventario(),
+                    inv.getFecha(),
+                    inv.getIdProducto().getNomProd(), // Nombre del producto
+                    inv.getIdProducto().getCategoria().getIdCategoria(), // Número de categoría
+                    inv.getCostoIngreso() // Costo de ingreso
+                };
+                modelo.addRow(fila); // Agregamos la fila a la tabla
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al listar: " + e.getMessage());
+        }
+    }
+}

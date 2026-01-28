@@ -1,0 +1,53 @@
+package org.cibertec.model;
+
+import java.io.Serializable;
+import java.sql.Date;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import lombok.Getter;
+import lombok.Setter;
+
+
+@Getter
+@Setter
+@Entity
+@Table(name="inventario")
+
+
+public class Inventario implements Serializable{
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="nro_inventario")
+	private int nroInventario;
+	
+	private Date fecha;
+	
+	@ManyToOne
+	@JoinColumn(name="id_prod")
+	private Producto idProducto;
+	
+	
+	@Column (name="costo_ingreso")
+	private double costoIngreso;
+	
+	@Column (name="motivo_ingreso",nullable=false)
+	private String motivoIngreso;
+	
+	@Transient
+	private transient int estado;
+	
+	
+
+
+
+}
