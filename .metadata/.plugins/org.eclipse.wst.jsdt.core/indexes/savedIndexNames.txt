@@ -1,0 +1,7 @@
+INDEX VERSION 1.4+C:\Users\ACER NITRO 5\Desktop\CIBERTEC CURSOS\5 ciclo\LP2\LP2_T1\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+2206121017.index
+3173350315.index
+2349906219.index
+3491860764.index
+2358543739.index
+1971081747.index
